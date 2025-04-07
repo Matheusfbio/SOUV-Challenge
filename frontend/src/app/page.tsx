@@ -18,6 +18,7 @@ import {
 import { AddItemForm } from "@/components/forms/AddItemForm";
 import { useState } from "react";
 import { ItemOptions } from "@/components/ItemOptions";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 interface Item {
   id: string;
@@ -81,12 +82,16 @@ export default function Home() {
           <DialogContent className="bg-black border border-white">
             <DialogHeader>
               <DialogTitle className="text-white">Adicionar item</DialogTitle>
-              <AddItemForm
-                onItemAdded={() =>
-                  queryClient.invalidateQueries({ queryKey: ["shoppingList"] })
-                }
-              />
+              <DialogDescription className="text-sm text-neutral-400">
+                Preencha os campos abaixo para adicionar um novo item à lista.
+              </DialogDescription>
             </DialogHeader>
+
+            <AddItemForm
+              onItemAdded={() =>
+                queryClient.invalidateQueries({ queryKey: ["shoppingList"] })
+              }
+            />
           </DialogContent>
         </Dialog>
       </div>
