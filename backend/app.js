@@ -1,8 +1,9 @@
-const express = require("express");
-const cors = require("cors");
-const shoppingRoutes = require("./shopping-routes");
-const swaggerUi = require("swagger-ui-express");
-const swaggerJsdoc = require("swagger-jsdoc");
+import express from "express";
+import cors from "cors";
+import db from "./db.js";
+import shoppingRoutes from "./shopping-routes.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -34,3 +35,5 @@ app.listen(PORT, () => {
   console.log(`🚀 Server listening on http://localhost:${PORT}`);
   console.log(`📚 Swagger docs available at http://localhost:${PORT}/api-docs`);
 });
+
+export default app;

@@ -2,7 +2,7 @@
 
 import QueryProvider from "@/components/query/QueryProvider";
 import { Toaster } from "sonner";
-import "./globals.css"; // Importa estilos globais
+import "./globals.css";
 
 export default function RootLayout({
   children,
@@ -13,7 +13,7 @@ export default function RootLayout({
     <html lang="pt">
       <body>
         <QueryProvider>
-          <Toaster /> {/* Adiciona o componente Toaster aqui */}
+          <Toaster />
           {children}
         </QueryProvider>
       </body>

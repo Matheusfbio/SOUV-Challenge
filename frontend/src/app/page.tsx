@@ -3,11 +3,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import clsx from "clsx";
-import { FiMoreVertical } from "react-icons/fi";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,12 +16,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { AddItemForm } from "@/components/forms/AddItemForm";
+import { useState } from "react";
+import { ItemOptions } from "@/components/ItemOptions";
 
 interface Item {
   id: string;
   name: string;
   unit: string;
   category: string;
+  quantity: number;
   completed: boolean;
 }
 
@@ -35,18 +36,17 @@ const categoryIcons: Record<string, string> = {
   carne: "🥩",
 };
 
-// Busca os itens da API
 const fetchItems = async (): Promise<Item[]> => {
   const { data } = await axios.get("http://localhost:5000/api/shopping-list");
   return data;
 };
 
 export default function Home() {
-  // const [] = useState({
-  //   name: "",
-  //   unit: "",
-  //   category: "",
-  // });
+  const [] = useState({
+    name: "",
+    unit: "1",
+    category: "",
+  });
 
   const queryClient = useQueryClient();
 
@@ -78,55 +78,15 @@ export default function Home() {
               ➕ Adicionar item
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-neutral-950 border border-neutral-800">
+          <DialogContent className="bg-black border border-white">
             <DialogHeader>
-              <DialogTitle>Adicionar item</DialogTitle>
+              <DialogTitle className="text-white">Adicionar item</DialogTitle>
               <AddItemForm
                 onItemAdded={() =>
                   queryClient.invalidateQueries({ queryKey: ["shoppingList"] })
                 }
               />
             </DialogHeader>
-            {/* <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                addItem.mutate();
-              }}
-              className="space-y-4"
-            >
-              <div className="space-y-1">
-                <Label>Nome</Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                />
-              </div>
-              <div className="flex space-x-4">
-                <div className="flex-1 space-y-1">
-                  <Label>Unidade</Label>
-                  <Input
-                    value={formData.unit}
-                    onChange={(e) =>
-                      setFormData({ ...formData, unit: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label>Categoria</Label>
-                <Input
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                />
-              </div>
-              <Button type="submit" className="w-full bg-green-600">
-                Salvar
-              </Button>
-            </form> */}
           </DialogContent>
         </Dialog>
       </div>
@@ -141,23 +101,54 @@ export default function Home() {
             <Card
               key={item.id}
               className={clsx(
-                "flex items-center p-4 rounded-lg border shadow-lg transition-all bg-neutral-800 hover:bg-neutral-700 cursor-pointer",
+                "flex items-center justify-between px-4 py-3 rounded-xl border border-neutral-800 bg-neutral-800 shadow-sm",
                 { "opacity-50": item.completed }
               )}
             >
-              <CardContent className="flex items-center w-full space-x-4">
+              <CardContent className="flex items-center w-full p-0">
                 <Checkbox
                   checked={item.completed}
                   onCheckedChange={() => toggleItemCompleted.mutate(item)}
+                  className="text-indigo-500 border-indigo-500 mr-4"
                 />
                 <div className="flex-1">
-                  <span className="text-lg font-semibold">{item.name}</span>
-                  <p className="text-sm text-neutral-400">{item.unit}</p>
+                  <p
+                    className={clsx(
+                      "text-base font-medium text-white",
+                      item.completed && "line-through text-neutral-500"
+                    )}
+                  >
+                    {item.name}
+                  </p>
+                  <p
+                    className={clsx(
+                      "text-sm text-neutral-400",
+                      item.completed && "line-through text-neutral-600"
+                    )}
+                  >
+                    {item.quantity} {item.unit}
+                  </p>
                 </div>
-                <Badge variant="secondary">
-                  {categoryIcons[item.category] || "🛍️"} {item.category}
-                </Badge>
-                <FiMoreVertical className="ml-3 text-neutral-400 hover:text-white cursor-pointer" />
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1 px-3 py-1 bg-neutral-900 rounded-full text-sm text-orange-400">
+                    <span>{categoryIcons[item.category] || "🛍️"}</span>
+                    <span className="capitalize">{item.category}</span>
+                  </div>
+
+                  <ItemOptions
+                    id={item.id}
+                    name={item.name}
+                    quantity={item.quantity}
+                    unit={item.unit}
+                    category={item.category}
+                    onRefresh={() =>
+                      queryClient.invalidateQueries({
+                        queryKey: ["shoppingList"],
+                      })
+                    }
+                  />
+                </div>
               </CardContent>
             </Card>
           ))

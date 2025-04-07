@@ -1,5 +1,5 @@
 // backend/db.js
-const Database = require("better-sqlite3");
+import Database from "better-sqlite3";
 const db = new Database("shopping.db");
 
 // Cria a tabela se ela não existir
@@ -14,4 +14,4 @@ db.exec(`
   )
 `);
 
-module.exports = db;
+export default db;

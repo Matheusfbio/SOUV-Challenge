@@ -41,7 +41,7 @@ export function AddItemForm({ onItemAdded }: AddItemFormProps) {
       toast.success("Item adicionado com sucesso!");
       setForm({ name: "", quantity: 1, unit: "UN", category: "" });
 
-      onItemAdded(); // 🔁 Recarrega a lista ao adicionar novo item
+      onItemAdded();
     } catch (error) {
       toast.error("Erro ao adicionar item.");
       console.error(error);
@@ -106,9 +106,10 @@ export function AddItemForm({ onItemAdded }: AddItemFormProps) {
           </SelectTrigger>
           <SelectContent className="bg-zinc-900 text-white">
             <SelectItem value="frutas">Frutas</SelectItem>
+            <SelectItem value="padaria">Padaria</SelectItem>
             <SelectItem value="vegetais">Vegetais</SelectItem>
             <SelectItem value="carne">Carne</SelectItem>
-            <SelectItem value="bebidas">Bebidas</SelectItem>
+            <SelectItem value="bebida">Bebidas</SelectItem>
             <SelectItem value="outros">Outros</SelectItem>
           </SelectContent>
         </Select>

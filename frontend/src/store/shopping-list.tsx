@@ -1,4 +1,3 @@
-// src/store/useShoppingListStore.ts
 import { create } from "zustand";
 
 interface Item {
