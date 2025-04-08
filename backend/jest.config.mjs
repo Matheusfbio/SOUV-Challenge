@@ -193,6 +193,11 @@ const config = {
 
   // Whether to use watchman for file crawling
   // watchman: true,
+  testEnvironment: "node",
+  transform: {}, // mantém vazio porque não precisa de Babel/TS
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1", // ajuda a evitar erros com import relativo
+  },
 };
 
 export default config;

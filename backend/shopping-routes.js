@@ -1,6 +1,6 @@
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
-import db from "./db.js"; // Importa o banco SQLite
+import db from "./db.js"; // Pool do PostgreSQL
 
 const router = express.Router();
 
@@ -33,10 +33,24 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Lista de itens
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Item'
  */
-router.get("/", (req, res) => {
-  const items = db.prepare("SELECT * FROM items").all();
-  res.json(items.map((i) => ({ ...i, completed: Boolean(i.completed) })));
+router.get("/", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM items");
+    const items = result.rows.map((i) => ({
+      ...i,
+      completed: Boolean(i.completed),
+    }));
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar itens" });
+  }
 });
 
 /**
@@ -54,19 +68,28 @@ router.get("/", (req, res) => {
  *       201:
  *         description: Item criado
  */
-router.post("/", (req, res) => {
-  const { name, quantity, unit, category } = req.body;
-  const id = uuidv4();
-  db.prepare(
-    `
-    INSERT INTO items (id, name, quantity, unit, category, completed)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `
-  ).run(id, name, quantity, unit, category, 0);
+router.post("/", async (req, res) => {
+  try {
+    const { name, quantity, unit, category } = req.body;
+    const id = uuidv4();
+    await db.query(
+      `INSERT INTO items (id, name, quantity, unit, category, completed)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, name, quantity, unit, category, false]
+    );
 
-  res
-    .status(201)
-    .json({ id, name, quantity, unit, category, completed: false });
+    res.status(201).json({
+      id,
+      name,
+      quantity,
+      unit,
+      category,
+      completed: false,
+    });
+  } catch (err) {
+    console.error("Erro ao inserir item:", err);
+    res.status(500).json({ error: "Erro ao inserir item" });
+  }
 });
 
 /**
@@ -90,18 +113,22 @@ router.post("/", (req, res) => {
  *       200:
  *         description: Item atualizado
  */
-router.put("/:id", (req, res) => {
-  const { id } = req.params;
-  const { name, quantity, unit, category, completed } = req.body;
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, quantity, unit, category, completed } = req.body;
 
-  db.prepare(
-    `
-    UPDATE items SET name = ?, quantity = ?, unit = ?, category = ?, completed = ?
-    WHERE id = ?
-  `
-  ).run(name, quantity, unit, category, completed ? 1 : 0, id);
+    await db.query(
+      `UPDATE items
+       SET name = $1, quantity = $2, unit = $3, category = $4, completed = $5
+       WHERE id = $6`,
+      [name, quantity, unit, category, completed, id]
+    );
 
-  res.json({ message: "Item atualizado" });
+    res.json({ message: "Item atualizado" });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao atualizar item" });
+  }
 });
 
 /**
@@ -119,10 +146,14 @@ router.put("/:id", (req, res) => {
  *       204:
  *         description: Item removido
  */
-router.delete("/:id", (req, res) => {
-  const { id } = req.params;
-  db.prepare("DELETE FROM items WHERE id = ?").run(id);
-  res.status(204).send();
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query("DELETE FROM items WHERE id = $1", [id]);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao deletar item" });
+  }
 });
 
 export default router;
