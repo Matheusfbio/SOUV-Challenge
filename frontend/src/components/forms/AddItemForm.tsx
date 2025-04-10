@@ -16,6 +16,8 @@ interface AddItemFormProps {
 }
 
 export function AddItemForm({ onItemAdded }: AddItemFormProps) {
+  const BASE_URL = process.env.RENDER_URL || "http://localhost:5000";
+
   const [form, setForm] = useState({
     name: "",
     quantity: 1,
@@ -36,7 +38,7 @@ export function AddItemForm({ onItemAdded }: AddItemFormProps) {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/shopping-list", form);
+      await axios.post(`http://${BASE_URL}/api/shopping-list`, form);
 
       toast.success("Item adicionado com sucesso!");
       setForm({ name: "", quantity: 1, unit: "UN", category: "" });

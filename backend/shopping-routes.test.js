@@ -1,160 +1,86 @@
-import express from "express";
-import { v4 as uuidv4 } from "uuid";
+import request from "supertest";
+import app from "../app.js";
+import db from "../db.js";
 
-import db from "./db.js"; // Pool do PostgreSQL
+// Mockando o módulo 'db'
+jest.mock("../db.js");
 
-const router = express.Router();
+describe("Shopping List API", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Item:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *         name:
- *           type: string
- *         quantity:
- *           type: number
- *         unit:
- *           type: string
- *         category:
- *           type: string
- *         completed:
- *           type: boolean
- */
-
-/**
- * @swagger
- * /api/shopping-list:
- *   get:
- *     summary: Retorna todos os itens da lista de compras
- *     responses:
- *       200:
- *         description: Lista de itens
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Item'
- */
-router.get("/", async (req, res) => {
-  try {
-    const result = await db.query("SELECT * FROM items");
-    const items = result.rows.map((i) => ({
-      ...i,
-      completed: Boolean(i.completed),
-    }));
-    res.json(items);
-  } catch (err) {
-    res.status(500).json({ error: "Erro ao buscar itens" });
-  }
-});
-
-/**
- * @swagger
- * /api/shopping-list:
- *   post:
- *     summary: Adiciona um novo item à lista
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Item'
- *     responses:
- *       201:
- *         description: Item criado
- */
-router.post("/", async (req, res) => {
-  try {
-    const { name, quantity, unit, category } = req.body;
-    const id = uuidv4();
-    await db.query(
-      `INSERT INTO items (id, name, quantity, unit, category, completed)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, name, quantity, unit, category, false]
-    );
-
-    res.status(201).json({
-      id,
-      name,
-      quantity,
-      unit,
-      category,
-      completed: false,
+  it("GET /api/shopping-list - deve retornar todos os itens", async () => {
+    db.query.mockResolvedValueOnce({
+      rows: [
+        {
+          id: "1",
+          name: "Banana",
+          quantity: 3,
+          unit: "kg",
+          category: "Frutas",
+          completed: 0,
+        },
+      ],
     });
-  } catch (err) {
-    console.error("Erro ao inserir item:", err);
-    res.status(500).json({ error: "Erro ao inserir item" });
-  }
+
+    const res = await request(app).get("/api/shopping-list");
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual([
+      {
+        id: "1",
+        name: "Banana",
+        quantity: 3,
+        unit: "kg",
+        category: "Frutas",
+        completed: false,
+      },
+    ]);
+  });
+
+  it("POST /api/shopping-list - deve criar um novo item", async () => {
+    db.query.mockResolvedValueOnce({});
+
+    const item = {
+      name: "Arroz",
+      quantity: 1,
+      unit: "kg",
+      category: "Grãos",
+    };
+
+    const res = await request(app).post("/api/shopping-list").send(item);
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toMatchObject(item);
+    expect(res.body).toHaveProperty("id");
+    expect(res.body).toHaveProperty("completed", false);
+  });
+
+  it("PUT /api/shopping-list/:id - deve atualizar um item", async () => {
+    db.query.mockResolvedValueOnce({});
+
+    const updatedItem = {
+      name: "Arroz integral",
+      quantity: 2,
+      unit: "kg",
+      category: "Grãos",
+      completed: true,
+    };
+
+    const res = await request(app)
+      .put("/api/shopping-list/abc-123")
+      .send(updatedItem);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ message: "Item atualizado" });
+  });
+
+  it("DELETE /api/shopping-list/:id - deve deletar um item", async () => {
+    db.query.mockResolvedValueOnce({});
+
+    const res = await request(app).delete("/api/shopping-list/abc-123");
+
+    expect(res.statusCode).toBe(204);
+  });
 });
-
-/**
- * @swagger
- * /api/shopping-list/{id}:
- *   put:
- *     summary: Atualiza um item da lista
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Item'
- *     responses:
- *       200:
- *         description: Item atualizado
- */
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, quantity, unit, category, completed } = req.body;
-
-    await db.query(
-      `UPDATE items
-       SET name = $1, quantity = $2, unit = $3, category = $4, completed = $5
-       WHERE id = $6`,
-      [name, quantity, unit, category, completed, id]
-    );
-
-    res.json({ message: "Item atualizado" });
-  } catch (err) {
-    res.status(500).json({ error: "Erro ao atualizar item" });
-  }
-});
-
-/**
- * @swagger
- * /api/shopping-list/{id}:
- *   delete:
- *     summary: Remove um item da lista
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       204:
- *         description: Item removido
- */
-router.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    await db.query("DELETE FROM items WHERE id = $1", [id]);
-    res.status(204).send();
-  } catch (_err) {
-    res.status(500).json({ error: "Erro ao deletar item" });
-  }
-});
-
-export default router;

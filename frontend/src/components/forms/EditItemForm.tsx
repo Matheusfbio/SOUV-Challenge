@@ -16,6 +16,7 @@ interface EditItemFormProps {
 
 export function EditItemForm({ item, onCancel, onSave }: EditItemFormProps) {
   const [form, setForm] = useState({ ...item });
+  const BASE_URL = process.env.RENDER_URL || "http://localhost:5000";
 
   const handleChange = (key: string, value: string | number) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -23,10 +24,7 @@ export function EditItemForm({ item, onCancel, onSave }: EditItemFormProps) {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/shopping-list/${item.id}`,
-        form
-      );
+      await axios.put(`http://${BASE_URL}/api/shopping-list/${item.id}`, form);
       toast.success("Item atualizado com sucesso!");
       onSave();
     } catch (error) {

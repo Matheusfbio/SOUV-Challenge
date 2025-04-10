@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 export function ItemList() {
   const queryClient = useQueryClient();
+  const BASE_URL = process.env.RENDER_URL || "http://localhost:5000";
 
   const {
     data: items,
@@ -13,16 +14,14 @@ export function ItemList() {
   } = useQuery({
     queryKey: ["shoppingList"],
     queryFn: async () => {
-      const response = await axios.get(
-        "http://localhost:5000/api/shopping-list"
-      );
+      const response = await axios.get("http://${BASE_URL}/api/shopping-list");
       return response.data;
     },
   });
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/shopping-list/${id}`);
+      await axios.delete(`http://${BASE_URL}/api/shopping-list/${id}`);
       toast.success("Item removido com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["shoppingList"] });
     } catch (err) {

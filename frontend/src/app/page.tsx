@@ -36,9 +36,10 @@ const categoryIcons: Record<string, string> = {
   bebida: "🥤",
   carne: "🥩",
 };
+const BASE_URL = process.env.RENDER_URL || "http://localhost:5000";
 
 const fetchItems = async (): Promise<Item[]> => {
-  const { data } = await axios.get("http://localhost:5000/api/shopping-list");
+  const { data } = await axios.get("http://${BASE_URL}/api/shopping-list");
   return data;
 };
 
@@ -58,7 +59,7 @@ export default function Home() {
 
   const toggleItemCompleted = useMutation({
     mutationFn: async (item: Item) => {
-      await axios.put(`http://localhost:5000/api/shopping-list/${item.id}`, {
+      await axios.put(`http://${BASE_URL}/api/shopping-list/${item.id}`, {
         ...item,
         completed: !item.completed,
       });
