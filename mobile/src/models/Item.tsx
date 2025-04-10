@@ -1,7 +1,7 @@
 // src/models/Item.ts
 
 export interface Item {
-  id: string;
+  id?: string;
   name: string;
   quantity: number;
   unit: string;

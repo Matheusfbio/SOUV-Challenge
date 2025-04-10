@@ -1,7 +1,7 @@
 // context/ShoppingListContext.tsx
 import { createContext, useContext, useState } from "react";
-import { Item } from "../models/Item";
-import { v4 as uuidv4 } from "uuid";
+
+import { Item } from "@/src/models/Item";
 
 type ShoppingListContextType = {
   items: Item[];
@@ -24,7 +24,6 @@ export function ShoppingListProvider({
   const addItem = (item: Omit<Item, "id" | "completed">) => {
     const newItem: Item = {
       ...item,
-      id: uuidv4(),
       completed: false,
     };
     setItems((prev) => [...prev, newItem]);

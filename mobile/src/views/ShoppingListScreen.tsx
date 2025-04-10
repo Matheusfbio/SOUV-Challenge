@@ -1,21 +1,36 @@
-import { View, ScrollView, TextInput, Pressable, Text } from "react-native";
-import Header from "@/components/Header";
-import CategorySelector from "@/components/CategorySelector";
-import QuantitySelector from "@/components/QuantitySelector";
-import ItemCard from "@/components/ItemCard";
-import { useState } from "react";
-import { useShoppingListContext } from "@/src/context/ShoppingListContext";
 import { Plus } from "lucide-react-native";
+import { useContext, useState } from "react";
+import {
+  View,
+  ScrollView,
+  TextInput,
+  Pressable,
+  Text,
+  StatusBar,
+} from "react-native";
+
+import CategorySelector from "@/components/CategorySelector";
+import Header from "@/components/Header";
+import ItemCard from "@/components/ItemCard";
+import QuantitySelector from "@/components/QuantitySelector";
+import { ShoppingListContext } from "@/src/context/ShoppingListContext";
 
 export default function ShoppingListScreen() {
-  const { items, addItem, removeItem, toggleItem } = useShoppingListContext();
+  const shoppingListContext = useContext(ShoppingListContext);
+
+  if (!shoppingListContext) {
+    throw new Error("ShoppingListContext is not provided");
+  }
+
+  const { items, addItem, removeItem, toggleItem } = shoppingListContext;
+
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [unit, setUnit] = useState("un");
   const [category, setCategory] = useState("");
 
   const handleAdd = () => {
-    if (!name) return;
+    if (!name.trim()) return;
     addItem({ name, quantity: Number(quantity), unit, category });
     setName("");
     setQuantity("1");
@@ -24,43 +39,60 @@ export default function ShoppingListScreen() {
   };
 
   return (
-    <ScrollView className="bg-black px-4 py-6 flex-1">
+    <ScrollView
+      className="flex-1 bg-black px-4 py-6"
+      showsVerticalScrollIndicator={false}
+    >
+      <StatusBar barStyle="light-content" />
       <Header />
 
+      {/* Input de nome do item */}
       <View className="mt-6 space-y-4">
-        <TextInput
-          className="bg-gray-800 rounded-md text-white px-3 py-2"
-          placeholder="Item"
-          placeholderTextColor="#aaa"
-          value={name}
-          onChangeText={setName}
-        />
-
-        <View className="flex-row space-x-4">
-          <QuantitySelector
-            quantity={quantity}
-            unit={unit}
-            onQuantityChange={setQuantity}
-            onUnitChange={setUnit}
+        <View>
+          <Text className="text-white text-base mb-1">Item</Text>
+          <TextInput
+            className="rounded-md bg-zinc-900 px-3 py-2 text-white border border-zinc-700"
+            placeholder="Item"
+            placeholderTextColor="#aaa"
+            value={name}
+            onChangeText={setName}
           />
-          <CategorySelector value={category} onChange={setCategory} />
+        </View>
+
+        {/* Linha com quantidade, categoria e botão de adicionar */}
+        <View className="flex-row items-end space-x-3">
+          <View className="flex-1">
+            <Text className="text-white text-base mb-1">Quantidade</Text>
+            <QuantitySelector
+              quantity={quantity}
+              unit={unit}
+              onQuantityChange={setQuantity}
+              onUnitChange={setUnit}
+            />
+          </View>
+
+          <View className="flex-1">
+            <Text className="text-white text-base mb-1">Categoria</Text>
+            <CategorySelector value={category} onChange={setCategory} />
+          </View>
 
           <Pressable
             onPress={handleAdd}
-            className="bg-purple-600 p-3 rounded-full items-center justify-center"
+            className="mb-1 h-12 w-12 items-center justify-center rounded-full bg-purple-600 active:opacity-80"
           >
-            <Plus color="white" size={20} />
+            <Plus color="black" size={44} />
           </Pressable>
         </View>
       </View>
 
-      <View className="mt-8">
+      {/* Lista de itens */}
+      <View className="mt-8 space-y-3 pb-8">
         {items.map((item) => (
           <ItemCard
             key={item.id}
             item={item}
-            onToggle={() => toggleItem(item.id)}
-            onDelete={() => removeItem(item.id)}
+            onToggle={() => item.id && toggleItem(item.id)}
+            onDelete={() => item.id && removeItem(item.id)}
           />
         ))}
       </View>

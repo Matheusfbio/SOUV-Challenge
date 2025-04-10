@@ -1,8 +1,9 @@
 import axios from "axios";
+
 import { Item } from "../models/Item";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/api/shopping-list",
+  baseURL: "http://localhost:5000/api/shopping-list",
 });
 
 export const fetchItems = async (): Promise<Item[]> => {

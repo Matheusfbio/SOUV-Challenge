@@ -4,6 +4,7 @@
     "moduleResolution": "node16",
     "module": "nodenext",
     "strict": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
     }
