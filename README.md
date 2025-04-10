@@ -33,10 +33,6 @@
 
 ---
 
-Claro! Aqui está o modelo de um **README.md** que você pode usar para documentar o seu projeto, explicando o que foi feito e como outra pessoa pode usar o projeto.
-
----
-
 # Shopping List Application
 
 Este é um projeto completo dividido em três partes principais: o **Frontend** (feito com Next.js), o **Backend** (feito com Express) e o **Mobile** (feito com React Native). O objetivo do projeto é permitir que os usuários gerenciem uma lista de compras, com a capacidade de adicionar itens, configurar a quantidade e a categoria, além de poderem visualizar, editar e excluir itens na lista.
