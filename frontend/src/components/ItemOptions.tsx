@@ -39,10 +39,7 @@ export function ItemOptions({
   category,
   onRefresh,
 }: ItemProps) {
-  const BASE_URL = process.env.RENDER_URL || "http://localhost:5000";
-
   const [open, setOpen] = useState(false);
-
   const [isEditing, setIsEditing] = useState(false);
 
   const [form, setForm] = useState({
@@ -58,7 +55,7 @@ export function ItemOptions({
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://${BASE_URL}/api/shopping-list/${id}`);
+      await axios.delete(`http://localhost:5000/api/shopping-list/${id}`);
       toast.success("Item deletado com sucesso!");
       onRefresh();
       setOpen(false);
@@ -70,7 +67,7 @@ export function ItemOptions({
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`http://${BASE_URL}/api/shopping-list/${id}`, form);
+      await axios.put(`http://localhost:5000/api/shopping-list/${id}`, form);
       toast.success("Item atualizado com sucesso!");
       onRefresh();
       setOpen(false);

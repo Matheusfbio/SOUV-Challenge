@@ -5,7 +5,6 @@ import axios from "axios";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
-const BASE_URL = process.env.RENDER_URL || "http://localhost:5000";
 
 const mockItems = [
   {
@@ -78,7 +77,7 @@ describe("Home", () => {
 
     await waitFor(() =>
       expect(mockedAxios.put).toHaveBeenCalledWith(
-        `http://${BASE_URL}/api/shopping-list/1`,
+        "http://localhost:5000/api/shopping-list/1",
         expect.objectContaining({ completed: true })
       )
     );
